@@ -1,9 +1,6 @@
-node_modules
-.next
-build
+out
 dist
-public
-*.log
-package-lock.json
-yarn.lock
-pnpm-lock.yaml 
+pnpm-lock.yaml
+LICENSE.md
+tsconfig.json
+tsconfig.*.json
