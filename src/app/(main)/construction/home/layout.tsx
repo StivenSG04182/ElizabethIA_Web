@@ -17,7 +17,7 @@ export default async function ConstructionHomeLayout({
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar />
         <main className="w-full">
-          <Navbar />
+          {/* <Navbar /> */}
           <div className="px-4">{children}</div>
         </main>
       </SidebarProvider>

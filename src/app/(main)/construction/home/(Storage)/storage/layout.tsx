@@ -1,20 +1,45 @@
+import Header from "@/components/Storage/Header";
+import MobileNavigation from "@/components/Storage/MobileNavigation";
+import Sidebar from "@/components/Storage/Sidebar";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import React from "react";
-import SidebarStorage from "@/components/Storage/SidebarStorage/SidebarStorage";
-import HeaderStorage from "@/components/Storage/HeaderStorage/HeaderStorage";
-import MobileNagation from "@/components/Storage/Mobile/mobileNavigation";
 
-const StorageLayout: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
-  return (
-    <main className="flex h-screen">
-      <SidebarStorage />
-      <section className="flex h-full flex-1 flex-col">
-        <MobileNagation /> <HeaderStorage />
-        <div className="main-content">{children}</div>
-      </section>
-    </main>
-  );
-};
+export default async function Layout({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
+	const user = await currentUser();
+	
+	if (!user) {
+		return redirect("/sign-in");
+	}
 
-export default StorageLayout;
+	// Preparar los datos del usuario en el formato esperado por los componentes
+	const userData = {
+		$id: user.id,
+		fullName: user.fullName || user.firstName + " " + user.lastName,
+		email: user.emailAddresses[0]?.emailAddress || "",
+		avatar: user.imageUrl || "https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg",
+		accountId: user.id,
+		ownerId: user.id,
+	};
+
+	return (
+		<div className=" flex bg-[#141517]">
+			<div className="hidden lg:block">
+				<Sidebar {...userData} />
+			</div>
+			<div className="flex-1 flex flex-col min-h-screen">
+				<Header />
+				<MobileNavigation {...userData} />
+				<main className="flex-1 flex flex-col items-center justify-center px-4 py-4">
+					<div className="w-full max-w-2xl mx-auto">
+						{children}
+					</div>
+				</main>
+			</div>
+		</div>
+	);
+}

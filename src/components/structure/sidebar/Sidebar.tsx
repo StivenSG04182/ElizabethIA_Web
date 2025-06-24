@@ -12,8 +12,10 @@ import {
   Projector,
   Search,
   Settings,
+  Settings2,
+  Upload,
   User2,
-} from "lucide-react";
+} from "lucide-react"
 
 import {
   Sidebar,
@@ -26,27 +28,18 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuAction,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarSeparator,
-} from "@/components/ui/sidebar";
-import Link from "next/link";
-import Image from "next/image";
-import {
-  DropdownMenu,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { DropdownMenuContent } from "@radix-ui/react-dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
+import Link from "next/link"
+import Image from "next/image"
+import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuContent } from "@/components/ui/dropdown-menu"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Button } from "@/components/ui/button"
 import {
   Sheet,
   SheetClose,
@@ -56,9 +49,13 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/sheet"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { useState } from "react"
+import ModalSetting from "@/components/modals/ModalSetting"
+import { UserButton } from "@clerk/nextjs"
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu"
 
 // Menu items.
 const items = [
@@ -92,48 +89,59 @@ const items = [
     url: "#",
     icon: Settings,
   },
-];
+]
 
 export function AppSidebar() {
+  const [openSettings, setOpenSettings] = useState(false)
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="py-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton size="lg" asChild>
               <Link href="/">
-                <Image
-                  src="/assets/icons/girl-svgrepo-com.svg"
-                  alt="Logo"
-                  width={20}
-                  height={20}
-                  className="h-8 w-8"
-                />
-                <span className="ml-2 text-lg font-semibold">ElizabethIA</span>
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <Image
+                    src="/assets/icons/girl-svgrepo-com.svg"
+                    alt="Logo"
+                    width={16}
+                    height={16}
+                    className="h-4 w-4"
+                  />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-semibold">ElizabethIA</span>
+                  <span className="text-xs text-sidebar-foreground/70">v1.0.0</span>
+                </div>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
+      <SidebarTrigger className="px-4 py-4"/> 
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarSeparator />
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map(item => (
+              {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>
                       <item.icon className="h-4 w-4" />
-                      {item.title}
+                      <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                   {item.title === "Inbox" && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <SidebarMenuAction>
+                        <SidebarMenuAction showOnHover>
                           <MoreHorizontal />
+                          <span className="sr-only">More</span>
                         </SidebarMenuAction>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent side="right" align="start">
@@ -151,62 +159,49 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarSeparator />
+
         <Collapsible defaultOpen className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel asChild>
-              <div className="flex items-center">
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center gap-2 focus:outline-none">
-                    Herramientas IAs
-                    <ChevronDown className="ml-2 transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                  </button>
-                </CollapsibleTrigger>
-                <Sheet>
-                  <SheetTrigger asChild className="ml-auto">
-                    <button
-                      className="ml-2 h-8 w-8 flex items-center justify-center rounded hover:bg-accent px-2"
-                      tabIndex={0}
-                      type="button"
-                      aria-label="Abrir Sheet"
-                      onClick={e => e.stopPropagation()}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Edit profile</SheetTitle>
-                      <SheetDescription>
-                        Make changes to your profile here. Click save when
-                        you&apos;re done.
-                      </SheetDescription>
-                    </SheetHeader>
-                    <div className="grid flex-1 auto-rows-min gap-6 px-4">
-                      <div className="grid gap-3">
-                        <Label htmlFor="sheet-demo-name">Name</Label>
-                        <Input
-                          id="sheet-demo-name"
-                          defaultValue="Pedro Duarte"
-                        />
-                      </div>
-                      <div className="grid gap-3">
-                        <Label htmlFor="sheet-demo-username">Username</Label>
-                        <Input
-                          id="sheet-demo-username"
-                          defaultValue="@peduarte"
-                        />
-                      </div>
-                    </div>
-                    <SheetFooter>
-                      <Button type="submit">Save changes</Button>
-                      <SheetClose asChild>
-                        <Button variant="outline">Close</Button>
-                      </SheetClose>
-                    </SheetFooter>
-                  </SheetContent>
-                </Sheet>
-              </div>
+              <CollapsibleTrigger className="group/label text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+                Herramientas IAs
+                <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+              </CollapsibleTrigger>
             </SidebarGroupLabel>
+            <SidebarGroupAction title="Agregar herramienta">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-5 w-5">
+                    <Plus className="h-4 w-4" />
+                    <span className="sr-only">Agregar herramienta</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Agregar nueva herramienta</SheetTitle>
+                    <SheetDescription>Configura una nueva herramienta de IA para tu workspace.</SheetDescription>
+                  </SheetHeader>
+                  <div className="grid flex-1 auto-rows-min gap-6 px-4">
+                    <div className="grid gap-3">
+                      <Label htmlFor="tool-name">Nombre</Label>
+                      <Input id="tool-name" placeholder="Nombre de la herramienta" />
+                    </div>
+                    <div className="grid gap-3">
+                      <Label htmlFor="tool-description">Descripción</Label>
+                      <Input id="tool-description" placeholder="Descripción breve" />
+                    </div>
+                  </div>
+                  <SheetFooter>
+                    <SheetClose asChild>
+                      <Button variant="outline">Cancelar</Button>
+                    </SheetClose>
+                    <Button type="submit">Guardar</Button>
+                  </SheetFooter>
+                </SheetContent>
+              </Sheet>
+            </SidebarGroupAction>
             <CollapsibleContent>
               <SidebarGroupContent>
                 <SidebarMenu>
@@ -214,7 +209,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link href="/#">
                         <Projector className="h-4 w-4" />
-                        Wireframe a Código
+                        <span>Wireframe a Código</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -222,7 +217,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link href="/#">
                         <Projector className="h-4 w-4" />
-                        Generador de Aplicaciones
+                        <span>Generador de Aplicaciones</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -230,7 +225,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link href="/#">
                         <Plus className="h-4 w-4" />
-                        IA que Codifica
+                        <span>IA que Codifica</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -238,7 +233,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link href="/#">
                         <Projector className="h-4 w-4" />
-                        Rastreador de Presupuesto
+                        <span>Rastreador de Presupuesto</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -246,7 +241,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link href="/#">
                         <Projector className="h-4 w-4" />
-                        Finanzas MERN
+                        <span>Finanzas MERN</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -254,7 +249,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link href="/#">
                         <Projector className="h-4 w-4" />
-                        Plataforma LMS
+                        <span>Plataforma LMS</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -262,7 +257,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link href="/#">
                         <Projector className="h-4 w-4" />
-                        LMS SaaS desde Cero
+                        <span>LMS SaaS desde Cero</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -271,42 +266,16 @@ export function AppSidebar() {
             </CollapsibleContent>
           </SidebarGroup>
         </Collapsible>
-        {/* <SidebarGroup>
-          <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <SidebarGroupAction>
-            <Plus /> <span className="sr-only">Add Project</span>
-          </SidebarGroupAction>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/#">
-                    <Projector className="h-4 w-4" />
-                    See All Projects
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/#">
-                    <Plus className="h-4 w-4" />
-                    Add Project
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup> */}
-        {/* NESTED */}
+
         <SidebarGroup>
-          <SidebarGroupLabel>Nested Items</SidebarGroupLabel>
+          <SidebarGroupLabel>Proyectos</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link href="/#">
                     <Projector className="h-4 w-4" />
-                    See All Projects
+                    <span>Ver Todos los Proyectos</span>
                   </Link>
                 </SidebarMenuButton>
                 <SidebarMenuSub>
@@ -314,7 +283,15 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link href="/#">
                         <Plus className="h-4 w-4" />
-                        Add Project
+                        <span>Agregar Proyecto</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuButton asChild>
+                      <Link href="/#">
+                        <User2 className="h-4 w-4" />
+                        <span>Creados por Mí</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuSubItem>
@@ -322,15 +299,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link href="/#">
                         <Plus className="h-4 w-4" />
-                        Created By Me
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuButton asChild>
-                      <Link href="/#">
-                        <Plus className="h-4 w-4" />
-                        Add Category
+                        <span>Agregar Categoría</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuSubItem>
@@ -340,30 +309,75 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarSeparator />
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
+            <ContextMenu>
+              <ContextMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Upload className="h-4 w-4" />
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">Subir archivo</span>
+                    <span className="truncate text-xs text-sidebar-foreground/70">Click derecho para opciones</span>
+                  </div>
+                </SidebarMenuButton>
+              </ContextMenuTrigger>
+              <ContextMenuContent className="w-auto">
+                <ContextMenuItem>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Subir desde dispositivo
+                </ContextMenuItem>
+                <ContextMenuItem>
+                  <PackageOpen className="h-4 w-4 mr-2" />
+                  Desde almacenamiento
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
-                  <User2 /> John Doe <ChevronUp className="ml-auto" />
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                    <UserButton />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">Mi Cuenta</span>
+                    <span className="truncate text-xs text-sidebar-foreground/70">Configuración y perfil</span>
+                  </div>
+                  <ChevronUp className="ml-auto size-4" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Link href="/profile">Profile</Link>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="bottom"
+                align="end"
+                sideOffset={4}
+              >
+                <DropdownMenuItem onClick={() => setOpenSettings(true)}>
+                  <Settings2 className="h-4 w-4 mr-2" />
+                  Configuración
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Link href="/settings">Settings</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/logout">Logout</Link>
+                  <User2 className="h-4 w-4 mr-2" />
+                  Perfil
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
+        <ModalSetting />
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }
